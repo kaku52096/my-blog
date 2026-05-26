@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: 255 255 255;
+    --fg: 15 23 42;
+    --muted: 100 116 139;
+    --border: 226 232 240;
+    --card: 248 250 252;
+    --accent: 99 102 241;
+  }
+
+  .dark {
+    --bg: 15 23 42;
+    --fg: 226 232 240;
+    --muted: 148 163 184;
+    --border: 30 41 59;
+    --card: 30 41 59;
+    --accent: 129 140 248;
+  }
+
+  body {
+    @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200 transition-colors duration-300;
+  }
+
+  * {
+    @apply border-slate-200 dark:border-slate-700;
+  }
+}
+
+@layer components {
+  .prose-custom {
+    @apply prose dark:prose-invert max-w-none
+      prose-headings:font-bold prose-headings:tracking-tight
+      prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
+      prose-a:text-indigo-500 dark:prose-a:text-indigo-400 prose-a:no-underline hover:prose-a:underline
+      prose-code:text-indigo-600 dark:prose-code:text-indigo-400
+      prose-pre:bg-transparent prose-pre:p-0
+      prose-blockquote:border-indigo-400 prose-blockquote:text-slate-500 dark:prose-blockquote:text-slate-400
+      prose-img:rounded-xl prose-img:shadow-md;
+  }
+}
+
+/* Code block styles from rehype-pretty-code */
+[data-rehype-pretty-code-figure] {
+  @apply my-6;
+}
+
+[data-rehype-pretty-code-figure] pre {
+  @apply rounded-xl overflow-x-auto text-sm leading-relaxed;
+  padding: 1.25rem 1.5rem;
+}
+
+[data-rehype-pretty-code-figure] [data-line] {
+  @apply px-0;
+}
+
+[data-rehype-pretty-code-title] {
+  @apply text-xs font-medium text-slate-400 bg-slate-800 dark:bg-slate-950 px-4 py-2 rounded-t-xl border-b border-slate-700 font-mono;
+}
+
+/* Highlighted lines */
+[data-highlighted-line] {
+  @apply bg-indigo-500/10 border-l-2 border-indigo-500 -mx-6 px-6;
+}
+
+/* TOC anchor link */
+.anchor {
+  @apply no-underline;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-600 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400 dark:bg-slate-500;
+}
