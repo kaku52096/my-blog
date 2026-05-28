@@ -10,7 +10,14 @@ interface Props {
 
 export async function generateStaticParams() {
   const tags = getAllTags();
-  return Object.keys(tags).map((tag) => ({
+  const tagNames = Object.keys(tags);
+
+  // 静态导出要求至少返回一个参数，否则会构建失败
+  if (tagNames.length === 0) {
+    return [{ tag: "_" }];
+  }
+
+  return tagNames.map((tag) => ({
     tag: encodeURIComponent(tag),
   }));
 }
@@ -27,6 +34,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function TagPage({ params }: Props) {
   const { tag } = await params;
   const decodedTag = decodeURIComponent(tag);
+
+  if (decodedTag === "_") {
+    notFound();
+  }
+
   const posts = getPostsByTag(decodedTag);
 
   if (posts.length === 0) {

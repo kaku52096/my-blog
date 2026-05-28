@@ -14,6 +14,9 @@ interface Props {
 
 export async function generateStaticParams() {
   const slugs = getAllPostSlugs();
+  if (slugs.length === 0) {
+    return [{ slug: "_" }];
+  }
   return slugs.map((slug) => ({ slug }));
 }
 
@@ -39,6 +42,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPost({ params }: Props) {
   const { slug } = await params;
+
+  if (slug === "_") {
+    notFound();
+  }
 
   let post;
   try {
