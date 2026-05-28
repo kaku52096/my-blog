@@ -9,7 +9,7 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   return (
     <article className="group">
-      <Link href={`/blog/${post.slug}`} className="block">
+      <Link href={`/blog/${encodeURIComponent(post.slug)}`} className="block">
         <div className="py-5 border-b border-slate-100 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors">
           <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500 mb-2">
             <time dateTime={post.date}>{formatDate(post.date)}</time>

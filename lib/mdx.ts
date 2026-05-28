@@ -1,9 +1,9 @@
-import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import type { MDXRemoteSerializeResult } from "next-mdx-remote";
+import type { MDXRemoteProps } from "next-mdx-remote/rsc";
+import { basePath } from "@/lib/config";
 
 export interface TocItem {
   id: string;
@@ -13,17 +13,17 @@ export interface TocItem {
 
 /** 将 posts/ 下的相对图片路径转为网站可访问的 /figures/... */
 export function rewritePostAssetPaths(content: string): string {
+  const prefix = basePath ? `${basePath}/figures/` : "/figures/";
+
   return content
-    .replace(/\]\(\.\/figures\//g, "](/figures/")
-    .replace(/\]\(figures\//g, "](/figures/")
-    .replace(/src="\.\/figures\//g, 'src="/figures/')
-    .replace(/src="figures\//g, 'src="/figures/');
+    .replace(/\]\(\.\/figures\//g, `](${prefix}`)
+    .replace(/\]\(figures\//g, `](${prefix}`)
+    .replace(/src="\.\/figures\//g, `src="${prefix}`)
+    .replace(/src="figures\//g, `src="${prefix}`);
 }
 
-export async function serializeMdx(
-  content: string
-): Promise<MDXRemoteSerializeResult> {
-  return serialize(rewritePostAssetPaths(content), {
+export function getMdxOptions(): MDXRemoteProps["options"] {
+  return {
     mdxOptions: {
       remarkPlugins: [remarkGfm],
       rehypePlugins: [
@@ -52,7 +52,7 @@ export async function serializeMdx(
       ],
       format: "mdx",
     },
-  });
+  };
 }
 
 export function extractToc(content: string): TocItem[] {

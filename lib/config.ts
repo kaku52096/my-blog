@@ -7,3 +7,6 @@ export const siteConfig = {
   email: "a213200488@gmail.com",
   postsPerPage: 10,
 };
+
+/** 与 next.config.ts 中的 basePath 保持一致 */
+export const basePath = "/my-blog";

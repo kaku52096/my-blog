@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getAllPostSlugs, getPost } from "@/lib/posts";
-import { serializeMdx, extractToc } from "@/lib/mdx";
+import { getAllPosts, getPost } from "@/lib/posts";
+import { extractToc, getMdxOptions, rewritePostAssetPaths } from "@/lib/mdx";
 import { formatDate } from "@/lib/utils";
-import { MdxContent } from "@/components/MdxContent";
+import { MDXRemote } from "next-mdx-remote/rsc";
 import { TableOfContents } from "@/components/TableOfContents";
 import { siteConfig } from "@/lib/config";
 
@@ -13,11 +13,11 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const slugs = getAllPostSlugs();
-  if (slugs.length === 0) {
+  const posts = getAllPosts();
+  if (posts.length === 0) {
     return [{ slug: "_" }];
   }
-  return slugs.map((slug) => ({ slug }));
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -54,10 +54,8 @@ export default async function BlogPost({ params }: Props) {
     notFound();
   }
 
-  const [mdxSource, toc] = await Promise.all([
-    serializeMdx(post.content),
-    Promise.resolve(extractToc(post.content)),
-  ]);
+  const toc = extractToc(post.content);
+  const mdxSource = rewritePostAssetPaths(post.content);
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -121,7 +119,7 @@ export default async function BlogPost({ params }: Props) {
 
           {/* Content */}
           <div className="prose-custom">
-            <MdxContent source={mdxSource} />
+            <MDXRemote source={mdxSource} options={getMdxOptions()} />
           </div>
         </article>
 

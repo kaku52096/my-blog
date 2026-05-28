@@ -19,54 +19,88 @@ export interface Post extends PostMeta {
   content: string;
 }
 
-export function getAllPostSlugs(): string[] {
+export function decodePostSlug(slug: string): string {
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+}
+
+function getAllPostFileSlugs(): string[] {
   const fileNames = fs.readdirSync(postsDirectory);
   return fileNames
     .filter((f) => f.endsWith(".md") || f.endsWith(".mdx"))
     .map((f) => f.replace(/\.(md|mdx)$/, ""));
 }
 
-export function getAllPosts(): PostMeta[] {
-  const slugs = getAllPostSlugs();
-  const posts = slugs.map((slug) => getPostMeta(slug));
-  return posts.sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+function resolvePostPath(fileSlug: string): string {
+  const mdPath = path.join(postsDirectory, `${fileSlug}.md`);
+  const mdxPath = path.join(postsDirectory, `${fileSlug}.mdx`);
+  if (fs.existsSync(mdxPath)) return mdxPath;
+  return mdPath;
 }
 
-export function getPostMeta(slug: string): PostMeta {
-  const fullPath = resolvePostPath(slug);
+function parsePost(fileSlug: string): Post {
+  const fullPath = resolvePostPath(fileSlug);
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(fileContents);
   const stats = readingTime(content);
+  const slug =
+    typeof data.slug === "string" && data.slug.trim()
+      ? data.slug.trim()
+      : fileSlug;
 
   return {
     slug,
-    title: data.title ?? slug,
-    date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
-    summary: data.summary ?? data.description ?? "",
-    tags: Array.isArray(data.tags) ? data.tags : [],
-    readingTime: stats.text,
-    cover: data.cover,
-  };
-}
-
-export function getPost(slug: string): Post {
-  const fullPath = resolvePostPath(slug);
-  const fileContents = fs.readFileSync(fullPath, "utf8");
-  const { data, content } = matter(fileContents);
-  const stats = readingTime(content);
-
-  return {
-    slug,
-    title: data.title ?? slug,
-    date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
+    title: data.title ?? fileSlug,
+    date: data.date
+      ? new Date(data.date).toISOString()
+      : new Date().toISOString(),
     summary: data.summary ?? data.description ?? "",
     tags: Array.isArray(data.tags) ? data.tags : [],
     readingTime: stats.text,
     cover: data.cover,
     content,
   };
+}
+
+function getAllPostsUnsorted(): Post[] {
+  return getAllPostFileSlugs().map((fileSlug) => parsePost(fileSlug));
+}
+
+function findPost(slug: string): Post | undefined {
+  const decodedSlug = decodePostSlug(slug);
+  return getAllPostsUnsorted().find((post) => post.slug === decodedSlug);
+}
+
+export function getAllPostSlugs(): string[] {
+  return getAllPosts().map((post) => post.slug);
+}
+
+export function getAllPosts(): PostMeta[] {
+  return getAllPostsUnsorted()
+    .map(({ content: _content, ...meta }) => meta)
+    .sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+}
+
+export function getPostMeta(slug: string): PostMeta {
+  const post = findPost(slug);
+  if (!post) {
+    throw new Error(`Post not found: ${slug}`);
+  }
+  const { content: _content, ...meta } = post;
+  return meta;
+}
+
+export function getPost(slug: string): Post {
+  const post = findPost(slug);
+  if (!post) {
+    throw new Error(`Post not found: ${slug}`);
+  }
+  return post;
 }
 
 export function getAllTags(): Record<string, number> {
@@ -82,11 +116,4 @@ export function getAllTags(): Record<string, number> {
 
 export function getPostsByTag(tag: string): PostMeta[] {
   return getAllPosts().filter((post) => post.tags.includes(tag));
-}
-
-function resolvePostPath(slug: string): string {
-  const mdPath = path.join(postsDirectory, `${slug}.md`);
-  const mdxPath = path.join(postsDirectory, `${slug}.mdx`);
-  if (fs.existsSync(mdxPath)) return mdxPath;
-  return mdPath;
 }
