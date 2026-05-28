@@ -11,10 +11,19 @@ export interface TocItem {
   level: number;
 }
 
+/** 将 posts/ 下的相对图片路径转为网站可访问的 /figures/... */
+export function rewritePostAssetPaths(content: string): string {
+  return content
+    .replace(/\]\(\.\/figures\//g, "](/figures/")
+    .replace(/\]\(figures\//g, "](/figures/")
+    .replace(/src="\.\/figures\//g, 'src="/figures/')
+    .replace(/src="figures\//g, 'src="/figures/');
+}
+
 export async function serializeMdx(
   content: string
 ): Promise<MDXRemoteSerializeResult> {
-  return serialize(content, {
+  return serialize(rewritePostAssetPaths(content), {
     mdxOptions: {
       remarkPlugins: [remarkGfm],
       rehypePlugins: [

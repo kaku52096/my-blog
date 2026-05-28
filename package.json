@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "sync:figures": "node scripts/sync-figures.mjs",
+    "dev": "npm run sync:figures && next dev",
+    "build": "npm run sync:figures && next build",
     "start": "next start",
     "lint": "next lint",
-    "export": "next build"
+    "export": "npm run build"
   },
   "dependencies": {
     "next": "15.1.7",

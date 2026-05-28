@@ -1,4 +1,4 @@
-# 我的博客
+# 个人博客
 
 基于 Next.js 15 + Tailwind CSS + MDX 构建的个人博客。
 
