@@ -39,7 +39,7 @@ TObjectPtr<AActor> ActorPtr;
 </p>
 
 
-使用类引用`TSubclassOf<>`、对象引用`TObjectPtr<>`或者向接口传递蓝图对象引用也会创建 Hard Reference，接口解决的是类型耦合（不必依赖具体 `UClass`），但引用强度取决于你怎么持有对象，而不是是否用了接口。如果父类拥有 Mesh, Textures，子类继承父类也会对父类的资产创建 Hard Reference。Hard Reference 的优点在于：引用简单，保证对象一定被加载。缺点是可能导致不必要的内存浪费。
+使用类引用 `TSubclassOf<>`、对象引用 `TObjectPtr<>` 或者向接口传递蓝图对象引用也会创建 Hard Reference，接口解决的是类型耦合（不必依赖具体 `UClass`），但引用强度取决于你怎么持有对象，而不是是否用了接口。如果父类拥有 Mesh, Textures，子类继承父类也会对父类的资产创建 Hard Reference。Hard Reference 的优点在于：引用简单，保证对象一定被加载。缺点是可能导致不必要的内存浪费。
 
 ## 如何避免 Hard Reference
 
@@ -49,7 +49,7 @@ TObjectPtr<AActor> ActorPtr;
 
 # Soft Reference
 
-Soft Reference 是指向运行时设置的资产、对象或类的一种间接指针。指针只保留路径，资源在被使用时才进行加载。Soft Reference 的访问速度通常比 Hard Reference 慢，因为它们需要在运行时进行额外查找才能找到资产、对象或类。在 UE 中使用`TSoftObjectPtr` `TSoftClassPtr` `TSoftAssetPtr`创建 Soft Reference。优点在于可以减少不必要的内存占用，缺点是可能因为资源未加载导致冲突，以及需要注意手动加载资源。
+Soft Reference 是指向运行时设置的资产、对象或类的一种间接指针。指针只保留路径，资源在被使用时才进行加载。Soft Reference 的访问速度通常比 Hard Reference 慢，因为它们需要在运行时进行额外查找才能找到资产、对象或类。在 UE 中使用 `TSoftObjectPtr`, `TSoftClassPtr`, `TSoftAssetPtr` 创建 Soft Reference。优点在于可以减少不必要的内存占用，缺点是可能因为资源未加载导致冲突，以及需要注意手动加载资源。
 
 <p align="center">
   <img src="figures/ue_rpg_1/load.png" width="800px" />
