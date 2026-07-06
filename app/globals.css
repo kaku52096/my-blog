@@ -48,6 +48,16 @@
   @apply my-6;
 }
 
+[data-rehype-pretty-code-figure] code[data-theme*=" "],
+[data-rehype-pretty-code-figure] code[data-theme*=" "] span {
+  color: var(--shiki-light);
+}
+
+.dark [data-rehype-pretty-code-figure] code[data-theme*=" "],
+.dark [data-rehype-pretty-code-figure] code[data-theme*=" "] span {
+  color: var(--shiki-dark);
+}
+
 [data-rehype-pretty-code-figure] pre {
   @apply rounded-xl overflow-x-auto text-sm leading-relaxed;
   padding: 1.25rem 1.5rem;
