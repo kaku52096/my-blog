@@ -33,7 +33,7 @@ tags: [UE, C++, GameplayAbilitySystem]
 
 在编辑器 Edit / Plugins 中搜索并添加 Gameplay Abilities 插件。在 IDE 中找到模块配置文件 Warrior.Build.cs (Warrior 是项目名)，添加  `GameplayTasks` 模块。
 
-```C++
+```c++
 // Games/Warrior/Source/Warrior/Warrior.Build.cs
 using UnrealBuildTool;
 public class Warrior : ModuleRules
@@ -344,8 +344,7 @@ AWarriorWeaponBase::AWarriorWeaponBase()
 
 # 在 Gameplay Ability 中完成 Spawn 逻辑
 
-目前我们已经有了要生成的武器类，武器生成的插槽，下面可以在 GA_Shared_SpawnWeapon 蓝图中写生成逻辑。在 ActivateAbility Event 中使用 SpawnActor 节点，拉出要生成的 Class 提升为 `Weapon Class to Spawn` 变量，设置变量类型为 WarriorWeaponBase 类引用。通过 Get Avatar Actor from Actor Info 节点获取 Ability 在世界中作用的 Actor 作为 Owner 引脚的输入，并用 pure cast 转化成 Pawn 类型作为 Instigator 引脚的输入。生成之后用 Attach Actor to Component，将武器拉到插槽位置。最后调用 End Ability，因为生成武器是个一次性触发的能力，之前设置为 `OnGiven`，生成之后直接 End 即可。Spawn 暴露了两个变量，`Weapon Class to Spawn` 生成什么类型的武器，`Socket Name to Attach to`  插入到哪个插槽里。
-
+目前我们已经有了要生成的武器类，武器生成的插槽，下面可以在 GA_Shared_SpawnWeapon 蓝图中写生成逻辑。在 ActivateAbility Event 中使用 SpawnActor 节点，拉出要生成的 Class 提升为 `Weapon Class to Spawn` 变量，设置变量类型为 WarriorWeaponBase 类引用。通过 Get Avatar Actor from Actor Info 节点获取 Ability 在世界中作用的 Actor 作为 Owner 引脚的输入，并用 pure cast 转化成 Pawn 类型作为 Instigator 引脚的输入。生成之后用 Attach Actor to Component，将武器拉到插槽位置，`Get Skeletal Mesh Component from Actor Info` 从 Actor Info 中获取拥有者的骨骼模型，连接 Parent 引脚。在之前 Actor Info 的源码中可以看到这些持有的引用。最后调用 End Ability，因为生成武器是个一次性触发的能力，之前设置为 `OnGiven`，生成之后直接 End 即可。Spawn 暴露了两个变量，`Weapon Class to Spawn` 生成什么类型的武器，`Socket Name to Attach to`  插入到哪个插槽里。
 <p align="center">
   <img src="figures/ue_rpg_4/spawn.png" width="1200px" />
 </p>
