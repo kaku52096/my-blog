@@ -1,5 +1,5 @@
 ---
-title: UE5 RPG (一) TObjectPtr, Hard/Soft Reference
+title: UE5 RPG（一）TObjectPtr, Hard/Soft Reference
 slug: UE-RPG-1
 date: 2026-7-2
 tags: [UE, C++]
@@ -14,7 +14,7 @@ TObjectPtr<AActor> ActorPtr;
 
 `TObjectPtr`是 UE5 推出的新特性，取代原来的成员变量指针。它只作用于成员变量，用于函数输入参数和本地变量时会直接转化成原始指针（raw pointer）。目前对成员指针变量使用`TObjectPtr`已经成为一种硬性规范。
 
-`TObjectPtr`支持访问追踪（Access Tracking）和延迟解析（Lazy Loading）。访问追踪让我们知道什么时候这个 Object 被使用，延迟解析只在资源被使用时进行加载，提升 Editor 的加载速度。当构建项目时，`TObjectPtr`会自动转化成 raw pointer，因此它只作用于 Editor，提升开发体验，并不影响实际运行时的性能。与实际运行表现相关的是 Hard / Soft Reference。
+`TObjectPtr`支持访问追踪（Access Tracking）和延迟解析（Lazy Loading）。访问追踪让我们知道什么时候这个 Object 被使用，延迟解析只在资源被使用时进行加载。当构建项目时，`TObjectPtr`会自动转化成 raw pointer，因此它只作用于 Editor，提升开发体验，并不影响实际运行时的性能。与实际运行表现相关的是 Hard / Soft Reference。
 
 # Hard Reference
 
