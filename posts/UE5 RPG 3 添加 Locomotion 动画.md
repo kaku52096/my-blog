@@ -2,7 +2,7 @@
 title: UE5 RPG（三）添加 Locomotion 动画
 slug: UE-RPG-3
 date: 2026-7-7
-tags: [UE, C++, AnimInstance]
+tags: [UE, AnimInstance]
 ---
 # Locomotion
 
@@ -27,7 +27,7 @@ tags: [UE, C++, AnimInstance]
 
 
 ```c++
-// WarriorCharacterAnimInstance.h
+// AnimInstances/WarriorCharacterAnimInstance.h
 #pragma once
 #include "CoreMinimal.h"
 #include "AnimInstances/WarriorBaseAnimInstance.h"
@@ -97,7 +97,7 @@ void UWarriorCharacterAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaS
 在 WarriorHeroAnimInstance 中，除了之前得到的变量，我们还需要一个可以在 Editor 中编辑的变量 `EnterRelaxStateThreshold` 设置主角进入 `Relax` 状态的阈值。在重载的 `NativeInitializeAnimation` 中将 AWarriorBaseCharacter 类型的 `Owning Character` 转换为 AWarriorHeroCharacter 类型的 `OwningHeroCharacter `引用。在重载的 `NativeThreadSafeUpdateAnimation` 中累加 `DeltaSeconds` 计时，计算 `bShouldEnterRelaxState` 变量。
 
 ```c++
-// WarriorHeroAnimInstance.h
+// AnimInstances/Hero/WarriorHeroAnimInstance.h
 #pragma once
 #include "CoreMinimal.h"
 #include "AnimInstances/WarriorCharacterAnimInstance.h"

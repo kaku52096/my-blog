@@ -2,7 +2,7 @@
 title: UE5 RPG（四）通过 GameplayAbilitySystem 生成武器
 slug: UE-RPG-4
 date: 2026-7-13
-tags: [UE, C++, GameplayAbilitySystem]
+tags: [UE, GameplayAbilitySystem]
 ---
 
 # Gameplay Ability System
@@ -60,7 +60,7 @@ public class Warrior : ModuleRules
 重载 APawn 的 PossessedBy 函数，当调用 `Controller->Possess(Pawn)` 且占有成功后，引擎会在该 Pawn 上调用 PossessedBy 函数，常在玩家开局或重生时触发，在此适合进行初始化逻辑。调用 `WarriorAbilitySystemComponent->InitAbilityActorInfo(this, this)` 初始化 ActorInfo，`InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor)` 有两个输入参数，第一个 `InOwnerActor` 是在逻辑上拥有 WarriorAbilitySystemComponent 组件的 Actor，第二个 `InAvatarActor` 是在世界中 WarriorAbilitySystemComponent 实际产生作用的 Actor，这里两者都是角色，因此使用自引用 this 作为输入。ActorInfo 持有组件拥有者的信息，方便在后续进行判定或引用。
 
 ```c++
-// WarriorBaseCharacter.h
+// Characters/WarriorBaseCharacter.h
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -127,7 +127,7 @@ void AWarriorBaseCharacter::PossessedBy(AController* NewController)
 }
 ```
 
-# 创建 Gameplay Ability
+# Gameplay Ability
 
 <p align="center">
   <img src="figures/ue_rpg_4/policy.png" width="800px" />
@@ -138,7 +138,7 @@ void AWarriorBaseCharacter::PossessedBy(AController* NewController)
 继承 GameplayAbility 创建 WarriorGameplayAbility，使用一个枚举类 `EWarriorAbilityActivationPolicy` 囊括 `On Given`，`On Triggered` 两种 policy。WarriorGameplayAbility 拥有此类型的枚举属性 `AbilityActivationPolicy`，暴露给编辑器方便配置。重载 `OnGiveAbility`，`EndAbility` 两个函数，分别在 Ability 被授予和结束时调用。如果是 `OnGiven` 属性，在 `OnGiveAbility` 函数中检查 `Spec` 判断 Ability 是否被激活，没有则调用 `ActorInfo->AbilitySystemComponent->TryActivateAbility(Spec.Handle)` 激活。在 `EndAbility` 函数中调用 `ActorInfo->AbilitySystemComponent->ClearAbility(Handle)` 移除 Ability。
 
 ```c++
-// WarriorGameplayAbility.h
+// AbilitySystem/Abilities/WarriorGameplayAbility.h
 #pragma once
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
@@ -291,7 +291,7 @@ struct FGameplayAbilitySpec : public FFastArraySerializerItem
 要让 Ability 生成武器，还需要一个武器类。继承 Actor 创建 WarriorWeaponBase；继承 WarriorWeaponBase 创建 WarriorHeroWeapon。武器类需要 `UStaticMeshComponent` 网格组件以及 `UBoxComponent` 碰撞体组件。在构造函数中进行初始化。
 
 ```c++
-// WarriorWeaponBase.h
+// Items/Weapons/WarriorWeaponBase.h
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -356,7 +356,7 @@ AWarriorWeaponBase::AWarriorWeaponBase()
 我们还需要一个 DataAsset 来配置 Abilities。继承 DataAsset 创建 DataAsset_StartUpDataBase；继承 DataAsset_StartUpDataBase 创建 DataAsset_HeroStartUpData。持有两个 `UWarriorGameplayAbility` 类型的列表 `ActivateOnGivenAbilities`，`ReactiveAbilities`。前者是 `OnGiven` 类型的 Abilities，后者是 `OnTriggered` 类型的 Abilities。提供 `GiveToAbilitySystemComponent(UWarriorAbilitySystemComponent* InWarriorASCToGive, int32 ApplyLevel = 1)` 函数将 Activities 发给输入的 `AbilitySystemComponent`。`ApplyLevel` 参数表示难度等级之类。
 
 ``` c++
-// DataAsset_StartUpDataBase.h
+// DataAssets/StartUpData/DataAsset_StartUpDataBase.h
 #pragma once
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
@@ -413,7 +413,7 @@ void UDataAsset_StartUpDataBase::GrantAbilities(const TArray<TSubclassOf<UWarrio
 在编辑器中基于 DataAsset_HeroStartUpData 创建数据文件 DA_Hero，将 GA_Hero_SpawnAxe 加入 `ActivateOnGivenAbilities` 列表。在 WarriorBaseCharacter.h 中使用软引用 `TSoftObjectPtr` 引用 `CharacterStartUpData`。在 `PossessedBy` 函数中检查 `CharacterStartUpData` 是否已配置。
 
 ```c++
-// WarriorBaseCharacter.h
+// Characters/WarriorBaseCharacter.h
 // ......
 UCLASS()
 class WARRIOR_API AWarriorBaseCharacter : public ACharacter, public IAbilitySystemInterface
@@ -470,4 +470,3 @@ void AWarriorHeroCharacter::PossessedBy(AController* NewController)
 </p>
 
 至此全部完成，运行可以看到角色在初始化时在背后生成了武器。我们使用 GAS 系统，让角色持有 AbilitySystemComponent 组件，将生成武器抽象为一种 `OnGiven` 类型的 Ability，把生成逻辑写在 GA_Hero_SpawnAxe 里。使用数据文件 DA_Hero 管理角色在初始化时拥有的 Ability，最后角色只要用软引用持有这个数据文件即可，实现了数据和逻辑的解耦。
-

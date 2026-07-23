@@ -2,7 +2,7 @@
 title: UE5 RPG（一）TObjectPtr, Hard/Soft Reference
 slug: UE-RPG-1
 date: 2026-7-2
-tags: [UE, C++]
+tags: [UE]
 ---
 # TObjectPtr
 
@@ -12,9 +12,22 @@ AActor* ActorPtr; 	// old
 TObjectPtr<AActor> ActorPtr;
 ```
 
-`TObjectPtr`是 UE5 推出的新特性，取代原来的成员变量指针。它只作用于成员变量，用于函数输入参数和本地变量时会直接转化成原始指针（raw pointer）。目前对成员指针变量使用`TObjectPtr`已经成为一种硬性规范。
+`TObjectPtr`是 UE5 推出的智能指针包装，取代传统 C++ 裸指针。它只作用于成员变量，用于函数输入参数和本地变量时会直接转化成原始指针（raw pointer）。目前对成员指针变量使用`TObjectPtr`已经成为一种硬性规范。`TObjectPtr`支持访问追踪（Access Tracking）和延迟解析（Lazy Loading）。
 
-`TObjectPtr`支持访问追踪（Access Tracking）和延迟解析（Lazy Loading）。访问追踪让我们知道什么时候这个 Object 被使用，延迟解析只在资源被使用时进行加载。当构建项目时，`TObjectPtr`会自动转化成 raw pointer，因此它只作用于 Editor，提升开发体验，并不影响实际运行时的性能。与实际运行表现相关的是 Hard / Soft Reference。
+## 访问追踪
+
+当在代码中通过 `TObjectPtr` 去读取或操作对象时，`TObjectPtr` 的内部拦截机制能够记录：
+
+- **谁在什么时候访问了这个对象？**
+- **这个对象在运行时是否真的被有效使用过？**
+
+引擎可以精准得知渲染或逻辑流程中资产的实际访问顺序，从而在 Cook 打包时优化包体资源在磁盘上的排序（将按顺序访问的资产存放在紧邻的位置），大幅提升读取速度。UE5 引入了更高效的垃圾回收机制，`TObjectPtr` 可以协助记录对象的“可达性”（Reachability），防止被引用的对象被 GC 错误回收。也能找到没有使用过的冗余资产。
+
+## 延迟解析
+
+IDE（VS Code, Rider, Visual Studio）仅仅处理文本，这里代码没有运行，也就不会加载 UE 资产。Unreal Editor（虚幻编辑器）本身是一个庞大的 3D 实时渲染程序，引擎必须把场景、模型、材质等资产读取到内存（RAM）和显存（VRAM）中，并由 GPU 进行实时绘制。在 UE4 及之前的版本中，如果一个对象包含裸指针成员变量（`UPROPERTY() UStaticMesh* Mesh;`），当该对象在编辑器中被载入内存时，引用的 `Mesh` 资产往往需要同步被解析并加载进来。而在 UE5 的 `TObjectPtr` 中，指针内部存储的不一定是一个直接的内存地址，而可以是一个资产句柄（Handle/Object ID）。未访问时只保留引用信息，先不把真实的内存地址解析出来，也不触发不必要的急切加载（Eager Load）。第一次尝试解引用（例如调用 `Mesh->GetBounds()`）时，`TObjectPtr` 会重载 `operator->` 或 `operator*`，自动将句柄解析为真正的 `UObject*` 内存指针。
+
+当构建项目时，`TObjectPtr`会自动转化成 raw pointer，因此它只作用于 Unreal Editor，提升开发体验，并不影响项目实际运行时的性能。与实际运行表现相关的是 Hard / Soft Reference。
 
 # Hard Reference
 
