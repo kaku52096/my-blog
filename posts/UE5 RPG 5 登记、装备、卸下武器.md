@@ -372,7 +372,7 @@ namespace WarriorGameplayTags
 
 ## 授予 GA_EquipAxe 时添加 Input Tag
 
-新建 WarriorStructTypes 方便写结构体函数。用 FWarriorHeroAbilitySet 结构体关联 Gameplay Ability 和对应的 Input Tag。
+新建 WarriorStructTypes 方便写结构体函数。用 FWarriorHeroAbilitySet 结构体关联 Hero Gameplay Ability 和对应的 Input Tag。
 
 ```c++
 // WarriorTypes/WarriorStructTypes.h
@@ -380,7 +380,7 @@ namespace WarriorGameplayTags
 #include "GameplayTagContainer.h"
 #include "WarriorStructTypes.generated.h"
 
-class UWarriorGameplayAbility;
+class UWarriorHeroGameplayAbility;
 
 USTRUCT(BlueprintType)
 struct FWarriorHeroAbilitySet
@@ -391,14 +391,14 @@ struct FWarriorHeroAbilitySet
 	FGameplayTag InputTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSubclassOf<UWarriorGameplayAbility> AbilityToGrant;
+	TSubclassOf<UWarriorHeroGameplayAbility> AbilityToGrant;
 
 	bool IsValid() const;
 };
 
 // WarriorStructTypes.cpp
 #include "WarriorTypes/WarriorStructTypes.h"
-#include "AbilitySystem/Abilities/WarriorGameplayAbility.h"
+#include "AbilitySystem/Abilities/WarriorHeroGameplayAbility.h"
 
 bool FWarriorHeroAbilitySet::IsValid() const
 {
@@ -430,7 +430,7 @@ private:
 // DataAsset_HeroStartUpData.cpp
 #include "DataAssets/StartUpData/DataAsset_HeroStartUpData.h"
 #include "AbilitySystem/WarriorAbilitySystemComponent.h"
-#include "AbilitySystem/Abilities/WarriorGameplayAbility.h"
+#include "AbilitySystem/Abilities/WarriorHeroGameplayAbility.h"
 
 void UDataAsset_HeroStartUpData::GiveToAbilitySystemComponent(UWarriorAbilitySystemComponent* InASCToGive, int32 ApplyLevel)
 {
