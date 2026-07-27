@@ -27,7 +27,7 @@ ActorComponent 是可挂载到 Actor 上，不带世界坐标的组件基类，�
 
 `GetOwningPawn`，`GetOwningController` 两个函数用模板在调用时指定返回类型，`TPointerIsConvertibleFromTo<T, APawn>::Value` 是编译期类型检查，检查 T 是否是 Pawn 的子类。`CastChecked<T>(GetOwner())` 是运行时类型检查，确保组件挂载的 Actor 能够当成调用时指定的 T 类型使用。
 
-```C++
+```c++
 // Components/PawnExtensionComponentBase.h
 #pragma once
 #include "CoreMinimal.h"
@@ -62,7 +62,7 @@ protected:
 
 在 PawnCombatComponent 中使用 GameplayTag 关联武器进行管理。`TMap<FGameplayTag, AWarriorWeaponBase*> CharacterCarriedWeaponMap` 用 Hash Map 保存了 GameplayTag 到武器引用的映射。`RegisterSpawnedWeapon` 函数登记武器，`GetCharacterCarriedWeaponByTag` 根据输入 Tag 返回武器引用。`CurrentEquippedWeaponTag` 是当前装备的武器对应的 Tag，`GetCharacterCurrentEquippedWeapon` 返回当前装备武器的引用。
 
-```C++
+```c++
 // Components/Combat/PawnCombatComponent.h
 #pragma once
 #include "CoreMinimal.h"
@@ -136,7 +136,7 @@ AWarriorWeaponBase* UPawnCombatComponent::GetCharacterCurrentEquippedWeapon() co
 
 继承 PawnCombatComponent 创建 HeroCombatComponent。增加 `GetHeroCarriedWeaponByTag` 调用 `GetCharacterCarriedWeaponByTag` 转化成 `AWarriorHeroWeapon` 类型返回。
 
-```C++
+```c++
 // Components/Combat/HeroCombatComponent.h
 #pragma once
 #include "CoreMinimal.h"
@@ -166,7 +166,7 @@ AWarriorHeroWeapon* UHeroCombatComponent::GetHeroCarriedWeaponByTag(FGameplayTag
 
 写好组件后，在 WarriorHeroCharacter 中以组合的方式持有该组件。
 
-```C++
+```c++
 // Characters/WarriorHeroCharacter.h
 UCLASS()
 class WARRIOR_API AWarriorHeroCharacter : public AWarriorBaseCharacter
@@ -195,7 +195,7 @@ AWarriorHeroCharacter::AWarriorHeroCharacter()
 
 GA 蓝图中通过 ActorInfo 结构体引用 Actor 的各个组件，但是 CombatComponent 不在其中，因此在 WarriorGameplayAbility 中增加一个获取 PawnCombatComponent 组建的函数方便在 GA 蓝图中调用。
 
-```C++
+```c++
 // AbilitySystem/Abilities/WarriorGameplayAbility.h
 class UPawnCombatComponent;
 
@@ -219,7 +219,7 @@ UPawnCombatComponent* UWarriorGameplayAbility::GetPawnCombatComponentFromActorIn
 
 给武器定义 GameplayTag: Player.Weapon.Axe。
 
-```C++
+```c++
 // WarriorGameplayTags.h
 namespace WarriorGameplayTags 
 {
@@ -252,7 +252,7 @@ namespace WarriorGameplayTags
 
 之前武器生成的 GA 是所有角色通用的，现在需要一个玩家角色使用的 GA 类，继承 WarriorGameplayAbility 创建 WarriorHeroGameplayAbility。ActorInfo 中使用 `TWeakObjectPtr` 指针引用相关组件，它只是指向引用，并不保证引用对象处于 alive 状态，不增加引用计数。扩展的 WarriorHeroGameplayAbility 同样使用弱指针引用玩家角色 `WarriorHeroCharacter` 和对应的 `WarriorHeroController`，提供相应的 Get 函数。使用弱指针前先用 `IsValid()` 函数判断对象可用状态，如果不可用则从 `CurrentActorInfo` 获取对应组件（`AvatarActor`, `playerController`）并转换。此外还提供了一个 `HeroCombatComponent` 组件 Get 函数，方便之后在 GA 蓝图写武器装备、卸下逻辑时使用。
 
-```C++
+```c++
 // AbilitySystem/Abilities/WarriorHeroGameplayAbility.h
 #pragma once
 #include "CoreMinimal.h"
@@ -314,7 +314,7 @@ UHeroCombatComponent* UWarriorHeroGameplayAbility::GetHeroCombatComponentFromAct
 
 基于 WarriorHeroGameplayAbility 创建 GA 蓝图 GA_Hero_EquipAxe，GA_Hero_UnequipAxe，触发模式都设置为 `OnTriggered`。Ability 可以使用 GameplayTag 的集合运算来简化复杂的状态逻辑，比如正在激活 GA_Hero_EquipAxe 时，不能再次触发 GA_Hero_EquipAxe 或 GA_Hero_UnequipAxe。先定义 Ability Tag。
 
-```C++
+```c++
 // WarriorGameplayTags.h
 namespace WarriorGameplayTags 
 {
@@ -350,7 +350,7 @@ namespace WarriorGameplayTags
 
 增加新的 `InputTag.EquipAxe`，`InputTag.UnequipAxe`。
 
-```C++
+```c++
 // WarriorGameplayTags.h
 namespace WarriorGameplayTags 
 {
@@ -374,7 +374,7 @@ namespace WarriorGameplayTags
 
 新建 WarriorStructTypes 方便写结构体函数。用 FWarriorHeroAbilitySet 结构体关联 Gameplay Ability 和对应的 Input Tag。
 
-```C++
+```c++
 // WarriorTypes/WarriorStructTypes.h
 #pragma once
 #include "GameplayTagContainer.h"
@@ -408,7 +408,7 @@ bool FWarriorHeroAbilitySet::IsValid() const
 
 扩展 DataAsset_HeroStartUpData，之前 DataAsset_StartUpDataBase 中定义了 `ActivateOnGivenAbilities` 与 `ReactiveAbilities`。在 DataAsset_HeroStartUpData 中增加 `TArray<FWarriorHeroAbilitySet> HeroStartUpAbilitySets`，初始时就被授予的主角能力。重写 `GiveToAbilitySystemComponent`，遍历这个列表，每一个 Ability 用 `AbilitySpec.DynamicAbilityTags.AddTag(AbilitySet.InputTag)` 打上 Input Tag，然后授予主角。
 
-```C++
+```c++
 // DataAssets/StartUpData/DataAsset_HeroStartUpData.h
 #pragma once
 #include "CoreMinimal.h"
@@ -459,7 +459,7 @@ Ability Input Actions 绑定步骤与之前的 NativeInputActions 类似，在 I
 
 DataAsset_InputConfig 中用元素类型为 `FWarriorInputActionConfig` 的列表`NativeInputActions` 保存了 `InputTag.Move`，`InputTag.Look` 等 Tag 对应的 InputAction。扩展 DataAsset_InputConfig，用列表 `AbilityInputActions` 保存另外与 Ability 相关的 Input Action。
 
-```C++
+```c++
 // DataAssets/Input/DataAsset_InputConfig.h
 USTRUCT(BlueprintType)
 struct FWarriorInputActionConfig
@@ -492,7 +492,7 @@ public:
 在 WarriorInputComponent 中为 AbilityInputActions 提供一个模板绑定函数。BindAction 在 Func 后面的参数是额外绑定参数（payload），触发时会一并传给回调。
 因此这里的 AbilityInputActionConfig.InputTag 会作为 InputReleasedFunc 的实参传入。
 
-```C++
+```c++
 // Components/Input/WarriorInputComponent.h
 template<class UserObject, typename CallbackFunc>
 inline void UWarriorInputComponent::BindAbilityInputAction(const UDataAsset_InputConfig* InInputConfig, UserObject* ContextObject, CallbackFunc InputPressedFunc, CallbackFunc InputReleasedFunc)
@@ -515,7 +515,7 @@ inline void UWarriorInputComponent::BindAbilityInputAction(const UDataAsset_Inpu
 
 显然这些 Ability 的逻辑不在 Character 中，而在各自的 GA 蓝图里。NativeInputActions 的回调函数写在 Character 中，与 IA 一一对应。AbilityInputActions 中的所有 Ability 使用同一套 Pressed/Released 回调，靠输入参数 InputTag 区分是 Equip 还是 Unequip，不必为每个 IA 各写一个函数。在 `SetupPlayerInputComponent` 中调用 `BindAbilityInputAction` 完成绑定。回调函数调用 `WarriorAbilitySystemComponent` 组件的响应函数，激活 InputTag 对应的 GA。
 
-```C++
+```c++
 // Characters/WarriorHeroCharacter.h
 struct FGameplayTag;
 
@@ -558,7 +558,7 @@ void AWarriorHeroCharacter::Input_AbilityInputReleased(FGameplayTag InInputTag)
 
 `WarriorAbilitySystemComponent` 组件收到 `InputTag` 后用 `GetActivatableAbilities` 获取当前拥有的 GA，如果 GA 持有输入的 InputTag 则激活，然后触发 GA 蓝图中激活后的具体逻辑。
 
-```C++
+```c++
 // AbilitySystem/WarriorAbilitySystemComponent.h
 #pragma once
 #include "CoreMinimal.h"
@@ -617,7 +617,7 @@ GA_Hero_EquipAxe 激活时先播放从背后拿武器的 Montage 动画，当手
 
 需要一个动画事件在 Montage 播放到手触碰武器时通知 Actor，这个信号也由 Gameplay Tag 完成。声明 `Player.Event.Equip.Axe`，`Player.Event.Unequip.Axe`。
 
-```C++
+```c++
 // WarriorGameplayTags.h
 namespace WarriorGameplayTags 
 {
@@ -675,7 +675,7 @@ namespace WarriorGameplayTags
     <img src="figures/ue_rpg_5/master.png" width="1200px" />
   </p>
 
-```C++
+```c++
 // AnimInstances/Hero/WarriorHeroLinkedAnimLayer.h
 #pragma once
 #include "CoreMinimal.h"
@@ -709,7 +709,7 @@ MasterAnimLayer_Hero 只是提供了逻辑定义，基于此创建子蓝图 Anim
 
 回顾需求，在 GA_Hero_EquipAxe 触发事件切换武器插槽后，还需要处理三部分逻辑：添加新的 IMC、授予武器能力、连接 AnimLayer。一开始输入 “1” 装备武器，装备状态再输入变成卸下武器，需要添加一个新的 IMC 并设置权重以覆盖，并在卸下后移除这个 IMC。不同武器可以使用不同的 GA，只有在已装备状态才能卸下武器，因此 GA_Hero_UnequipAxe 是在装备上武器后才授予角色的，并不是角色 StartUpData 一开始就有的能力。角色在空手与持械状态有不同的移动动画，目前已经在主 ABP 中实现了动画接口，调用了 ArmedLocomotionState；然后在 MasterAnimLayer_Hero 中实现了具体逻辑，在 AnimLayer_HeroAxe 中配置动作资产，还需要在 GA_Hero_EquipAxe 中连接 AnimLayer_HeroAxe。这些资产都和 Weapon 相关，在 WarriorStructTypes 里增加一个 FWarriorHeroWeaponData 结构体。
 
-```C++
+```c++
 // WarriorTypes/WarriorStructTypes.h
 USTRUCT(BlueprintType)
 struct FWarriorHeroWeaponData
@@ -729,7 +729,7 @@ struct FWarriorHeroWeaponData
 
 在 WarriorHeroWeapon 中拥有这个结构体。FGameplayAbilitySpecHandle 是 GAS 里某一条已授予能力（FGameplayAbilitySpec）的句柄，`GrantedAbilitySpecHandle` 记录了由武器给出的所有 GA 句柄，方便在 GA_Hero_UnequipAxe 中清除这些武器带来的 GA，而不影响其他 GA。
 
-```C++
+```c++
 // Items/Weapons/WarriorHeroWeapon.h
 #pragma once
 #include "CoreMinimal.h"
@@ -777,7 +777,7 @@ TArray<FGameplayAbilitySpecHandle> AWarriorHeroWeapon::GetGrantedAbilitySpecHand
 
 在 WarriorAbilitySystemCompinent 中提供两个函数 `GrantHeroWeaponAbilities`，`RemoveGrantedHeroWeaponAbilities` 供 GA_Hero_EquipAxe 和 GA_Hero_UnequipAxe 使用。`GiveAbility(AbilitySpec)` 的返回值就是 FGameplayAbilitySpecHandle。`RemoveGrantedHeroWeaponAbilities` 使用引用传参，没有 `UPARAM(ref)` 蓝图往往把非 const 引用当成普通输入，加上之后，蓝图传入的数组会真正被函数修改并写回。
 
-```C++
+```c++
 // AbilitySystem/WarriorAbilitySystemCompinent.h
 #pragma once
 #include "CoreMinimal.h"
