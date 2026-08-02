@@ -17,7 +17,7 @@ tags: [UE, GameplayAbilitySystem]
 
 - **数据驱动**：使用 Gameplay Attribute Set 配置属性，Gameplay Effect 修改属性，将数据与逻辑分离。
 
-- **技能释放过程中的异步逻辑控制**：技能往往不是一瞬间完成的，它是一个包含生命周期的过程（例如：前摇 $\rightarrow$ 判定 $\rightarrow$ 伤害触发 $\rightarrow$ 后摇 $\rightarrow$ 结束）。GAS 提供了 Ability Tasks，允许在技能内部安全地进行异步等待和分段控制。
+- **技能释放过程中的异步逻辑控制**：技能往往不是一瞬间完成的，它是一个包含生命周期的过程（例如：前摇，判定，伤害触发，后摇，结束）。GAS 提供了 Ability Tasks，允许在技能内部安全地进行异步等待和分段控制。
 
 - **统一的表现层**：Gameplay Cue 系统负责 Ability 的音效和粒子特效。服务器只需要同步一个轻量级的 Tag，客户端在本地根据这个 Tag 去查表播放。
 
